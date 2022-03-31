@@ -2,9 +2,8 @@
 created VPC, 6 subnets, 2 route table, internet gateway, and also associated the subnet to the appropriate route table
 
 ```
-
 # -------------------------------------------------- 
-#  Aws instance creating
+#  Aws VPC creation
 # -------------------------------------------------- 
 
 
@@ -38,7 +37,7 @@ resource "aws_internet_gateway" "igw" {
 }
 
 # -------------------------------------------------- 
-# # Aws subneting creation public
+# # Aws subnet creation of public
 # -------------------------------------------------- 
 
 resource "aws_subnet" "public" {
@@ -62,7 +61,7 @@ tags = {
 
 
 # -------------------------------------------------- 
-# Creating route table  public
+# Creating route table for public subnet
 # -------------------------------------------------- 
 
 resource "aws_route_table" "public" {
@@ -74,7 +73,7 @@ resource "aws_route_table" "public" {
 }
 
 # -------------------------------------------------- 
-# Route table association of public
+# Route table association of public subnet
 # -------------------------------------------------- 
 
 
@@ -91,7 +90,7 @@ resource "aws_route_table_association" "public" {
 
 
 # -------------------------------------------------- 
-# # Aws subnet creation private
+# # Aws subnet creation for private
 # -------------------------------------------------- 
 
 resource "aws_subnet" "private" {
@@ -114,7 +113,7 @@ tags = {
 }
 
 # -------------------------------------------------- 
-# Creating route table  private
+# Creating route table for private subnet
 # -------------------------------------------------- 
 
 resource "aws_route_table" "private" {
@@ -125,7 +124,7 @@ resource "aws_route_table" "private" {
   }
 }
 # -------------------------------------------------- 
-# Route table association of private
+# Route table association of private subnet
 # -------------------------------------------------- 
 
 
