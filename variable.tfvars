@@ -1,9 +1,9 @@
-region = "Enter your regieon here "
+region = "put-your-region-here"
 
-access_key = "Enter your access key here "
+access_key = "put-your-access_key-here"
 
-secret_key = "Enter your secrete key here"
+secret_key = "put-your-secret_key-here"
 
-vpc_cidr = "172.20.0.0/16"
+vpc_cidr = "X.X.X.X/16"
 
-project = "zomato"
+project = "name-of-your-project"
