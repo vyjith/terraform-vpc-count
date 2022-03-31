@@ -38,7 +38,7 @@ resource "aws_internet_gateway" "igw" {
 }
 
 # -------------------------------------------------- 
-# # Aws subneting creation for public
+# # Aws subneting creation public
 # -------------------------------------------------- 
 
 resource "aws_subnet" "public" {
@@ -62,7 +62,7 @@ tags = {
 
 
 # -------------------------------------------------- 
-# Creating route table for public
+# Creating route table  public
 # -------------------------------------------------- 
 
 resource "aws_route_table" "public" {
@@ -91,7 +91,7 @@ resource "aws_route_table_association" "public" {
 
 
 # -------------------------------------------------- 
-# # Aws subnet creation for private
+# # Aws subnet creation private
 # -------------------------------------------------- 
 
 resource "aws_subnet" "private" {
@@ -114,7 +114,7 @@ tags = {
 }
 
 # -------------------------------------------------- 
-# Creating route table for private
+# Creating route table  private
 # -------------------------------------------------- 
 
 resource "aws_route_table" "private" {
