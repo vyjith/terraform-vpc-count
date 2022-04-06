@@ -1,12 +1,62 @@
-# terraform-loop-vpc-3subnet
-created VPC, 6 subnets, 2 route table, internet gateway, and also associated the subnet to the appropriate route table
 
+
+# Creating VPC through terraform
+
+
+## Features
+- Easy to customise and use.
+- Each subnet CIDR block created through automation.
+- Using tfvars file to access and modify variables.
+- Project name is appended to the resources that are creating.
+
+## Prerequisites for this project
+- Need AWS CLI access or IAM user access with attached policies for the creation of VPC.
+- Terraform need to be installed in your system.
+- Knowledge to the working principles of each AWS services especially VPC, EC2 and IP Subnetting.
+
+## Installation
+
+If you need to download terraform , then click here [Terraform](https://www.terraform.io/downloads.html) .
+
+
+Lets create a file for declaring the variables.This is used to declare the variable and the values are passing through the terrafrom.tfvars file.
+
+### Create a variables.tf file
+```sh
+variable "region" {}
+variable "access_key" {}
+variable "secret_key" {}
+variable "vpc_cidr" {}
+variable "project" {}
 ```
-# -------------------------------------------------- 
-#  Aws VPC creation
-# -------------------------------------------------- 
+### Create a provider.tf file 
+```sh
+provider "aws" {
+  region     = var.region
+  access_key = var.access_key
+  secret_key = var.secret_key
+}
+```
+### Create a terraform.tfvars
+By default terraform.tfvars will load the variables to the the reources.
+You can modify accordingly as per your requirements.
+
+```sh
+region = "put-your-region-here"
+access_key = "put-your-access_key-here"
+secret_key = "put-your-secret_key-here"
+vpc_cidr = "X.X.X.X/16"
+project = "name-of-your-project"
+```
+Go to the directory that you wish to save your tfstate files.Then Initialize the working directory containing Terraform configuration files using below command.
+```sh
+terraform init
+```
+#### Lets start creating main.tf file with the details below.
 
 
+> To create VPC
+```sh
 resource "aws_vpc" "main" {
 
    cidr_block = var.vpc_cidr
@@ -22,11 +72,16 @@ resource "aws_vpc" "main" {
     }
 
 }
+```
+> To Gather All Subnet Name
+```sh
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+```
 
-# -------------------------------------------------- 
-# Creating Internet gateway
-# -------------------------------------------------- 
-
+> To create InterGateWay For VPC
+```sh
 resource "aws_internet_gateway" "igw" {
 
   vpc_id = aws_vpc.main.id
@@ -35,11 +90,11 @@ resource "aws_internet_gateway" "igw" {
     Name = var.project
   }
 }
+```
+Here in this infrastructre we shall create 3 public and 3 private subnets in the region.This sample was meant for regions having 6 availability zone. I have used "us-east-1". Choose your region and modify according to the availability of the AZ. Also we have already provided the CIDR block in our terraform.tfvars you dont need to calculate the subnets, here we use terraform to automate the subnetting in /19.
 
-# -------------------------------------------------- 
-# # Aws subnet creation of public
-# -------------------------------------------------- 
-
+> Creating public1, public2, public3 Subnet using count 
+```sh
 resource "aws_subnet" "public" {
 
   count = 3
@@ -58,45 +113,9 @@ tags = {
 
   }
 }
-
-
-# -------------------------------------------------- 
-# Creating route table for public subnet
-# -------------------------------------------------- 
-
-resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.main.id
-
-   route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
-  }
-
-   tags = {
-    Name = "${var.project}-public"
-  }
-}
-
-# -------------------------------------------------- 
-# Route table association of public subnet
-# -------------------------------------------------- 
-
-
-resource "aws_route_table_association" "public" {
-
-  count =3 
-  
-  subnet_id      = aws_subnet.public[count.index].id
-  route_table_id = aws_route_table.public.id
-
-  depends_on = [
-    aws_subnet.public ]
-}
-
-
-# -------------------------------------------------- 
-# # Aws subnet creation for private
-# -------------------------------------------------- 
+```
+> Creating private1, private2, private3 Subnet using count 
+```sh
 
 resource "aws_subnet" "private" {
 
@@ -116,36 +135,43 @@ tags = {
 
   }
 }
-# ===============================================================================
-# Creating Elastic Ip For Nat Gateway.
-# ===============================================================================
-
+```
+> Creating  Elastic IP For Nat Gateway
+```sh
 resource "aws_eip" "eip" {
   vpc      = true
   tags     = {
     Name = "${var.project}-eip"
   }
 }
-
-
-# ===============================================================================
-# Creating Elastic Ip For Nat Gateway.
-# ===============================================================================
-
+```
+> Attaching Elastic IP to NAT gateway
+```sh
 resource "aws_nat_gateway" "nat" {
-    
   allocation_id = aws_eip.eip.id
-  subnet_id     = aws_subnet.public[1].id
-
+  subnet_id     = aws_subnet.public1.id
   tags = {
     Name = "${var.project}-nat"
   }
 }
+```
+>  Creating Public Route Table
+```sh
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
 
-# -------------------------------------------------- 
-# Creating route table for private subnet
-# -------------------------------------------------- 
+   route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
 
+   tags = {
+    Name = "${var.project}-public"
+  }
+}
+```
+>  Creating Private Route Table
+```sh
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
 
@@ -158,21 +184,67 @@ resource "aws_route_table" "private" {
     Name = "${var.project}-private"
   }
 }
-# -------------------------------------------------- 
-# Route table association of private subnet
-# -------------------------------------------------- 
-
-
-resource "aws_route_table_association" "private" {
-
-  count =3 
-  
-  subnet_id      = aws_subnet.private[count.index].id
-  route_table_id = aws_route_table.private.id
-
-  depends_on = [
-    aws_subnet.private ]
+```
+> Creating Public Route Table Association
+```sh
+resource "aws_route_table_association" "public1" {        
+  subnet_id      = aws_subnet.public1.id
+  route_table_id = aws_route_table.public.id
 }
-
-
+resource "aws_route_table_association" "public2" {      
+  subnet_id      = aws_subnet.public2.id
+  route_table_id = aws_route_table.public.id
+}
+resource "aws_route_table_association" "public3" {       
+  subnet_id      = aws_subnet.public3.id
+  route_table_id = aws_route_table.public.id
+}
+```
+> Creating Private Route Table Association
+```sh
+resource "aws_route_table_association" "private1" {        
+  subnet_id      = aws_subnet.private1.id
+  route_table_id = aws_route_table.private.id
+}
+resource "aws_route_table_association" "private2" {      
+  subnet_id      = aws_subnet.private2.id
+  route_table_id = aws_route_table.private.id
+}
+resource "aws_route_table_association" "private3" {       
+  subnet_id      = aws_subnet.private3.id
+  route_table_id = aws_route_table.private.id
+}
+````
+### Create an output.tf for getting  terrafrom output.
+```sh
+output "aws_eip" {
+value = aws_eip.eip.public_ip
+}
+output "aws_vpc" {
+value = aws_vpc.vpc.id
+}
+output "aws_internet_gateway" {
+value = aws_internet_gateway.igw.id
+}
+output "aws_nat_gateway" {
+value = aws_nat_gateway.nat.id
+}
+output "aws_route_table_public" {
+value = aws_route_table.public.id
+}
+output "aws_route_table_private" {
+value = aws_route_table.private.id
+}
+```
+#### Lets validate the terraform files using
+```sh
+terraform validate
+```
+#### Lets plan the architecture and verify once again.
+```sh
+terraform plan
+```
+#### Lets apply the above architecture to the AWS.
+```sh
+terraform apply
 ```
