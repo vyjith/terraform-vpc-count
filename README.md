@@ -11,7 +11,7 @@
 
 ## Prerequisites for this project
 
-![](https://i.ibb.co/swzJJrn/vpc.png)
+
 - Need AWS CLI access or IAM user access with attached policies for the creation of VPC.
 - Terraform need to be installed in your system.
 - Knowledge to the working principles of each AWS services especially VPC, EC2 and IP Subnetting.
