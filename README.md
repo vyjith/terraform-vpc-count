@@ -187,32 +187,28 @@ resource "aws_route_table" "private" {
 ```
 > Creating Public Route Table Association
 ```sh
-resource "aws_route_table_association" "public1" {        
-  subnet_id      = aws_subnet.public1.id
+resource "aws_route_table_association" "public" {
+
+  count =3 
+  
+  subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
-}
-resource "aws_route_table_association" "public2" {      
-  subnet_id      = aws_subnet.public2.id
-  route_table_id = aws_route_table.public.id
-}
-resource "aws_route_table_association" "public3" {       
-  subnet_id      = aws_subnet.public3.id
-  route_table_id = aws_route_table.public.id
+
+  depends_on = [
+    aws_subnet.public ]
 }
 ```
 > Creating Private Route Table Association
 ```sh
-resource "aws_route_table_association" "private1" {        
-  subnet_id      = aws_subnet.private1.id
+resource "aws_route_table_association" "private" {
+
+  count =3 
+  
+  subnet_id      = aws_subnet.private[count.index].id
   route_table_id = aws_route_table.private.id
-}
-resource "aws_route_table_association" "private2" {      
-  subnet_id      = aws_subnet.private2.id
-  route_table_id = aws_route_table.private.id
-}
-resource "aws_route_table_association" "private3" {       
-  subnet_id      = aws_subnet.private3.id
-  route_table_id = aws_route_table.private.id
+
+  depends_on = [
+    aws_subnet.private ]
 }
 ````
 ### Create an output.tf for getting  terrafrom output.
@@ -221,7 +217,7 @@ output "aws_eip" {
 value = aws_eip.eip.public_ip
 }
 output "aws_vpc" {
-value = aws_vpc.vpc.id
+value = aws_vpc.main.id
 }
 output "aws_internet_gateway" {
 value = aws_internet_gateway.igw.id
